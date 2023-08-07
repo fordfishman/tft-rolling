@@ -57,6 +57,15 @@ class Pool():
             n += len(cost)
         
         return n
+    
+    def get_odds(self, unit) -> float:
+
+        """ 
+        Odds of getting one unit per cost level
+        """
+        count = sum([ 1 for unit_shop in self.units[unit.cost] if unit.name==unit_shop.name])
+
+        return count/len(self.units[unit.cost])
         
 
 

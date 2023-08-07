@@ -53,3 +53,16 @@ class Shop():
     def level_up(self) -> None:
         self.__level += 1
         return None
+    
+    def get_odds(self, unit, pool) -> float:
+        
+        odds = 0
+
+        if True:
+
+            odds = pool.get_odds(unit) * self.odds[self.__level-1][unit.cost-1]
+
+        return odds
+
+
+
