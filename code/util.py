@@ -1,4 +1,5 @@
 from Unit import Unit
+from Shop import Shop
 import numpy as np
 import requests
 import json
@@ -37,19 +38,7 @@ def number_shops(unit, nteam, npool, nother, star, level):
 
     ntot = [29, 22, 18, 12, 10]
 
-    all_odds = [
-            np.array([1., 0., 0., 0., 0.]),
-            np.array([1., 0., 0., 0., 0.]),
-            np.array([0.75, 0.25, 0., 0., 0.]),
-            np.array([0.55, 0.30, 0.15, 0., 0.]),
-            np.array([0.45, 0.33, 0.20, 0.02, 0.]),
-            np.array([0.25, 0.40, 0.30, 0.05, 0.]),
-            np.array([0.19, 0.30, 0.35, 0.15, 0.01]),
-            np.array([0.16, 0.20, 0.35, 0.25, 0.04]),
-            np.array([0.09, 0.15, 0.30, 0.30, 0.16]),
-            np.array([0.05, 0.10, 0.20, 0.40, 0.25]),
-            np.array([0.01, 0.02, 0.12, 0.50, 0.35])
-        ]
+    all_odds = Shop(1).odds
     
     odds = all_odds[level-1]
 

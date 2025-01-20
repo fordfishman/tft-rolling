@@ -5,7 +5,7 @@ from util import load_units
 class Pool():
 
     def __init__(self) -> None:
-        self.units = {i:[] for i in range(1,6)}
+        self.units = {i:[] for i in range(1,7)}
         self.new_game()
 
 
@@ -28,6 +28,9 @@ class Pool():
         for i in range(10):
             self.units[5] += [Unit(unit_name, cost=5) for unit_name in unit_dict[5]]
         
+        for i in range(6):
+            self.units[6] += [Unit(unit_name, cost=6) for unit_name in unit_dict[6]]
+        
         return None
 
     def get_unit(self, cost) -> Unit:
@@ -48,11 +51,10 @@ class Pool():
         """
         Returns size of pool
         ---------------------------
-        cost (int): If 1, 2, 3, 4, or
-            5 is provided, will return the 
-            size of the pool for that cost only.
-            When None (default), returns size of
-            whole pool.
+        cost (int): If 1, 2, 3, 4, 5, or 6 is 
+            provided, will return the size of the 
+            pool for that cost only. When None (default), 
+            returns size of whole pool.
         """
         
         n = 0
