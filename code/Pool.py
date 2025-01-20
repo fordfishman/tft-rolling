@@ -11,11 +11,11 @@ class Pool():
 
     def new_game(self) -> None:
         unit_dict = {
-            1:["Cassiopeia", "Cho'Gath", "Irelia", "Jhin", "Kayle", "Malzahar", "Maokai", "Orianna", "Poppy", "Renekton", "Samira", "Tristana", "Viego"],
-            2:["Ashe", "Galio", "Jinx", "Kassadin", "Kled", "Sett", "Soraka", "Swain", "Taliyah", "Teemo", "Vi", "Warwick", "Zed"],
-            3:["Akshan", "Darius", "Ekko", "Garen", "Jayce", "Kalista", "Karma", "Katarina", "Lissandra", "Rek'Sai", "Sona", "Taric", "Vel'Koz"],
-            4:["Aphelios", "Azir", "Gwen", "Jarvan IV", "Kai'Sa", "Lux", "Nasus", "Sejuani", "Shen", "Urgot", "Yasuo", "Zeri"],
-            5:["Aatrox", "Ahri", "Bel'veth", "Heimerdinger", "K'Sante", "Ryze", "Senna", "Sion"]}
+            1:["Cassiopeia", "Cho'Gath", "Graves", "Illaoi", "Irelia", "Jhin", "Kayle", "Malzahar", "Milio",  "Orianna", "Poppy", "Renekton"],
+            2:["Ashe", "Galio", "Jinx", "Kassadin", "Naafiri", "Qiyana", "Sett", "Soraka", "Swain", "Taliyah", "Twisted Fate", "Vi", "Warwick"],
+            3:["Darius", "Ekko",  "Jayce",  "Karma", "Katarina", "Miss Fortune", "Nautilus", "Neeko", "Quinn", "Rek'Sai", "Sona", "Taric", "Vel'Koz"],
+            4:["Aphelios", "Azir", "Fiora", "Jarvan IV", "Kai'Sa", "Mordekaiser", "Nasus", "Nilah", "Sejuani", "Shen", "Silco", "Xayah"],
+            5:["Aatrox", "Ahri", "Bel'veth", "Gangplank", "Heimerdinger", "K'Sante", "Ryze", "Sion"]}
         
         
         for i in range(29):
@@ -49,14 +49,29 @@ class Pool():
 
         return None
     
-    def size(self) -> int:
-
+    def size(self, cost=None) -> int:
+        """
+        Returns size of pool
+        ---------------------------
+        cost (int): If 1, 2, 3, 4, or
+            5 is provided, will return the 
+            size of the pool for that cost only.
+            When None (default), returns size of
+            whole pool.
+        """
+        
         n = 0
 
-        for cost in self.units.values():
-            n += len(cost)
+        if cost is None: # if no cost provided
+
+            for cost_ in self.units.values():
+                n += len(cost_)
+
+        else:
+            n = len(self.units[cost])
         
         return n
+
     
     def get_odds(self, unit) -> float:
 
