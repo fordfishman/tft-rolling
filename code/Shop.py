@@ -1,25 +1,14 @@
 from Unit import Unit
 from Pool import Pool
 import numpy as np
+from util import load_shop_odds
 
 class Shop():
 
     def __init__(self, level:int) -> None:
         self.__level = level
         self.slots = [ None for i in range(5) ]
-        self.odds = [
-            np.array([1., 0., 0., 0., 0.]),
-            np.array([1., 0., 0., 0., 0.]),
-            np.array([0.75, 0.25, 0., 0., 0.]),
-            np.array([0.55, 0.30, 0.15, 0., 0.]),
-            np.array([0.45, 0.33, 0.20, 0.02, 0.]),
-            np.array([0.25, 0.40, 0.30, 0.05, 0.]),
-            np.array([0.19, 0.30, 0.35, 0.15, 0.01]),
-            np.array([0.16, 0.20, 0.35, 0.25, 0.04]),
-            np.array([0.09, 0.15, 0.30, 0.30, 0.16]),
-            np.array([0.05, 0.10, 0.20, 0.40, 0.25]),
-            np.array([0.01, 0.02, 0.12, 0.50, 0.35])
-        ]
+        self.odds = load_shop_odds()
     
     def fresh_shop(self, pool) -> None:
 

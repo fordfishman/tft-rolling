@@ -1,5 +1,6 @@
 from Unit import Unit
 import numpy as np
+from util import load_units
 
 class Pool():
 
@@ -10,13 +11,7 @@ class Pool():
 
 
     def new_game(self) -> None:
-        unit_dict = {
-            1:["Cassiopeia", "Cho'Gath", "Graves", "Illaoi", "Irelia", "Jhin", "Kayle", "Malzahar", "Milio",  "Orianna", "Poppy", "Renekton"],
-            2:["Ashe", "Galio", "Jinx", "Kassadin", "Naafiri", "Qiyana", "Sett", "Soraka", "Swain", "Taliyah", "Twisted Fate", "Vi", "Warwick"],
-            3:["Darius", "Ekko",  "Jayce",  "Karma", "Katarina", "Miss Fortune", "Nautilus", "Neeko", "Quinn", "Rek'Sai", "Sona", "Taric", "Vel'Koz"],
-            4:["Aphelios", "Azir", "Fiora", "Jarvan IV", "Kai'Sa", "Mordekaiser", "Nasus", "Nilah", "Sejuani", "Shen", "Silco", "Xayah"],
-            5:["Aatrox", "Ahri", "Bel'veth", "Gangplank", "Heimerdinger", "K'Sante", "Ryze", "Sion"]}
-        
+        unit_dict = load_units()
         
         for i in range(29):
             self.units[1] += [Unit(unit_name, cost=1) for unit_name in unit_dict[1]]

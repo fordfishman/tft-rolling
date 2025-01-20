@@ -1,5 +1,7 @@
 from Unit import Unit
 import numpy as np
+import requests
+import json
 
 
 def number_shops(unit, nteam, npool, nother, star, level):
@@ -81,5 +83,58 @@ def number_shops(unit, nteam, npool, nother, star, level):
     return rolls
 
 
+def load_units(): 
+    """
+    Load CDragon TFT JSON data 
+
+    Returns dictionary of units sorted by unit cost
+    """
+
+    # url to CDragon for TFT latest patch, could change in the future
+    url = 'https://raw.communitydragon.org/latest/cdragon/tft/en_us.json'
+
+    r = requests.get(url)
+
+    data = json.loads(r.text)
+
+    units = dict()
+
+    for unit in data['sets']['13']['champions']:
+    
+        if unit['cost'] <= 6 and len(unit['traits'])>0:
+
+            if unit['cost'] not in units.keys():
+                units[unit['cost']] = [unit['name']]
+            
+            else:
+                units[unit['cost']].append(unit['name'])
+
+    return units
+
+def load_shop_odds():
+
+    """
+    Grab shop odds from DDragon
+    May need to update with 6 costs or other changes
+    """
+
+    # url to DDragon for TFT latest patch
+    url = 'https://raw.githubusercontent.com/InFinity54/LoL_DDragon/refs/heads/master/latest/data/en_US/tft-shop-drop-rates-data.json'
+
+    r = requests.get(url)
+
+    data = json.loads(r.text)
+
+    shop_odds = list()
+
+    print(data['data']['Shop'][0])
+
+    for level in data['data']['Shop']:
+
+        level_drop_rates = level['dropRatesByTier']
+
+        odds_array = np.array([ cost['rate'] for cost in level_drop_rates ])
+        shop_odds.append(odds_array)
 
 
+    return shop_odds
