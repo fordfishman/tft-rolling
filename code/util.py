@@ -38,6 +38,7 @@ def number_shops(unit, nteam, npool, nother, star, level):
 
     ntot = [29, 22, 18, 12, 10]
 
+    # level shouldn't matterr for this
     all_odds = Shop(1).odds
     
     odds = all_odds[level-1]
