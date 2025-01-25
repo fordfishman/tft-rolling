@@ -1,14 +1,12 @@
-from Unit import Unit
-from Shop import Shop
 import numpy as np
 import requests
 import json
 
 
-def number_shops(unit, nteam, npool, nother, star, level):
+def number_shops(unit, nteam, npool, nother, star, level, shop):
     """
     Calculates the expected number
-    of shopes until you hit an upgrade (2 or
+    of shops until you hit an upgrade (2 or
     3 star).
     ----------------------------------------
     unit (Unit): The desired unit
@@ -21,6 +19,7 @@ def number_shops(unit, nteam, npool, nother, star, level):
     star (int): desiredstar level of desired 
         unit
     level (int): Current team level
+    shop (Shop): Current shop
     
     """
 
@@ -36,10 +35,10 @@ def number_shops(unit, nteam, npool, nother, star, level):
 
     cost = unit.cost
 
-    ntot = [29, 22, 18, 12, 10]
+    ntot = [30, 25, 18, 10, 9, 9]
 
-    # level shouldn't matterr for this
-    all_odds = Shop(1).odds
+    # level shouldn't matter for this
+    all_odds = shop.odds
     
     odds = all_odds[level-1]
 
@@ -123,7 +122,7 @@ def load_shop_odds():
 
         level_drop_rates = level['dropRatesByTier']
 
-        odds_array = np.array([ cost['rate'] for cost in level_drop_rates ])
+        odds_array = np.array([ cost['rate'] for cost in level_drop_rates ])/100
         shop_odds.append(odds_array)
 
 
