@@ -13,27 +13,31 @@ class Pool():
     def new_game(self) -> None:
         unit_dict = load_units()
         
-        for i in range(29):
+        for i in range(30):
             self.units[1] += [Unit(unit_name, cost=1) for unit_name in unit_dict[1]]
         
-        for i in range(22):
+        for i in range(25):
             self.units[2] += [Unit(unit_name, cost=2) for unit_name in unit_dict[2]]
 
         for i in range(18):
             self.units[3] += [Unit(unit_name, cost=3) for unit_name in unit_dict[3]]
             
-        for i in range(12):
+        for i in range(10):
             self.units[4] += [Unit(unit_name, cost=4) for unit_name in unit_dict[4]]
 
-        for i in range(10):
+        for i in range(9):
             self.units[5] += [Unit(unit_name, cost=5) for unit_name in unit_dict[5]]
         
-        for i in range(6):
+        for i in range(9):
             self.units[6] += [Unit(unit_name, cost=6) for unit_name in unit_dict[6]]
         
         return None
 
     def get_unit(self, cost) -> Unit:
+        """
+        Get a random unit of a cost and return it, 
+        removing it from the pool
+        """
 
         unit = np.random.choice(self.units[cost])
 
