@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import sys
 import os
+import copy
 
 
 current_file_path = os.path.abspath(__file__)
@@ -89,14 +90,61 @@ class TestShop(unittest.TestCase):
         self.shops = [Shop(i) for i in range(1, 12)]
         self.pool = Pool()
 
-    # def test_shop_class(self):
-    #     from Shop import Shop
+    def test_shop_odds(self):
 
-    #     level = 1
+        self.assertEqual(len(self.shops), 11, 'incorrect number of levels')
 
-    #     shop = Shop(level)
+        for i, shop in enumerate(self.shops):
+
+            odds = shop.odds[i]
+
+            self.assertEqual(odds.shape[0], 6, 'Not enough odds for 6 costs')
+            self.assertAlmostEqual(np.sum(odds), 1, 7,'Odds do not sum to 1')
+
+    def test_fresh_shop(self):
+
+        shop = copy.deepcopy(self.shops[7])
+
+        shop.fresh_shop(self.pool)
+
+        self.assertEqual(len(shop.slots), 5, 'Shop does not have 5 slots')
+
+        for unit in shop.slots:
+
+            self.assertIsInstance(unit, Unit, 'Slot does not contain a unit')
 
         
+        for i in range(6):
+        
+            shop.odds[7] = np.zeros(6)
+            shop.odds[7][i] = 1
+
+            shop.refresh_shop(self.pool)
+
+            for unit in shop.slots:
+
+                self.assertEqual(unit.cost, i+1, 'Probability of getting a unit of a specific cost working incorrectly')
+
+class TestUtil(unittest.TestCase):
+
+    def setUp(self):
+
+        self.pool = Pool()
+
+    #     self.unit = Unit('Amumu', 1)
+    #     self.nteam = 0
+    #     self.npool = 30
+    #     self.nother = 0
+    #     self.star = 1
+    #     self.level = 1
+    #     self.shop = Shop(1)
+
+    def test_edge_cases(self):
+
+        self.assertEqual()
+
+
+
 if __name__ == '__main__':
     unittest.main()
 
