@@ -1,29 +1,81 @@
 # Import packages
-from dash import Dash, html, dash_table, dcc, callback, Output, Input
+from dash import Dash, html, dash_table, dcc, callback, Output, Input, State, ctx
 import pandas as pd
 import plotly.express as px
+import sys
+import os
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+current_file_path = os.path.abspath(__file__)
+current_directory = os.path.dirname(current_file_path)
+sys.path.append(os.path.join(current_directory, '../code'))
+
+print(os.path.join(os.getcwd(),'../code'))
+
+from Unit import Unit
+from Pool import Pool
+from Shop import Shop
+from util import number_shops
+
+pool = Pool()
+shops = [Shop(i) for i in range(1,12)]
 
 # Initialize the app - incorporate css
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
-    html.Div(className='row',children='My First App with Data and a Graph', style = {'textAlign': 'center', 'fontSize': 30}),
-    html.Hr(),
-    dcc.RadioItems(options=['pop', 'lifeExp', 'gdpPercap'], value='pop', inline=True, id='controls-and-radio-item'),
-    dash_table.DataTable(data=df.to_dict('records'), page_size=6),
-    dcc.Graph(figure={}, id='controls-and-graph')
+    html.Div(className='row',children='TFT: Expected Number of Rolls', style = {'textAlign': 'center', 'fontSize': 30}),
+    html.Div(
+        children=[
+            html.Hr(),
+            html.P('Star level of desired unit'),
+            dcc.RadioItems(options=[1, 2, 3], value=2, inline=True, id='star-level'),
+            html.P('Level'),
+            dcc.Input(placeholder='Integer (0-10)', type='number', id='level'),
+            html.P('Number of desired unit already purchased'),
+            dcc.Input(placeholder='Integer (0-8)', type='number', id='nteam'),
+            html.P('Number of desired unit on other boards and benches'),
+            dcc.Input(placeholder='Integer (0+)', type='number', id='nother'),
+            html.Br(),
+            html.Br(),
+            html.Div(
+                html.Button('Submit', id='submit-val', n_clicks=0)
+            ),
+            html.Div(id='roll-string',
+             children=''),
+            html.Hr()
+        ]
+    )
 ])
-
 @callback(
-    Output(component_id='controls-and-graph', component_property='figure'),
-    Input(component_id='controls-and-radio-item', component_property='value')
+    Output(component_id='roll-string', component_property='children'),
+    Input(component_id='submit-val', component_property='n_clicks'),
+    State(component_id='star-level', component_property='value'),
+    State(component_id='nteam', component_property='value'),
+    State(component_id='nother', component_property='value'),
+    State(component_id='level', component_property='value'),
+    prevent_initial_call=True
 )
+def update_number_of_shops(n_clicks, star_level, nteam, nother, level):
 
-def update_graph(col_chosen):
-    return px.histogram(df, x='continent', y=col_chosen, histfunc='avg')
+    text = 'Enter a value and press submit'
+
+    # print(button)
+
+    if n_clicks > 0:
+        text = 'Number of shops until Jinx 2 star: {}'.format(
+            number_shops(
+                Unit("Jinx",5), 
+                nteam=nteam, 
+                npool=pool.size(5)-nteam-nother, 
+                nother=nother, 
+                star=star_level,
+                level=level, 
+                shop=shops[9]
+                )
+            )
+
+    return text
 
 
 if __name__ == '__main__':

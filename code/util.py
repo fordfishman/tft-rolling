@@ -3,7 +3,7 @@ import requests
 import json
 
 
-def number_shops(unit, nteam, npool, nother, star, level, shop):
+def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=False):
     """
     Calculates the expected number
     of shops until you hit an upgrade (2 or
@@ -12,26 +12,31 @@ def number_shops(unit, nteam, npool, nother, star, level, shop):
     unit (Unit): The desired unit
     nteam (int): Number of desired unit on 
         team
-    npool (int): Number of units of the cost
-        in of the desired unit in the pool
+    npool (int or float): Number or percentage 
+        of units of the same 
+        cost of the desired unit left in the 
+        pool
     nother (int): Number of desired unit on
         other boards or benches
-    star (int): desiredstar level of desired 
-        unit
+    star (int): desired star level of unit
     level (int): Current team level
     shop (Shop): Current shop
     
     """
 
+    if nteam >= 9:
+        return "Unit is already 3 starred"
+
     if star == 3:
         nneeded = 9 - nteam
 
     elif star == 2:
-        nneeded = 3 - nteam
-        assert nneeded > 0, 'you already have a two star'
+        nneeded = 3 - nteam % 3
     
     elif star == 1:
         nneeded = 1
+
+    number_needed = nneeded # for printing
 
     cost = unit.cost
 
@@ -45,6 +50,9 @@ def number_shops(unit, nteam, npool, nother, star, level, shop):
     cost_odd = odds[cost-1]
 
     nleft = ntot[cost-1] - nteam - nother # number
+
+    if nleft <= 0:
+        return "Not enough units left in pool"
 
     probs = []
     rolls = []
@@ -63,13 +71,19 @@ def number_shops(unit, nteam, npool, nother, star, level, shop):
 
         nneeded -= 1
 
-    print(probs)
-    print(rolls)
-    print(sum(rolls))
-    print(sum(rolls)/5)
+    if not disable_print:
+
+        print("Probability per shop slot for hitting {} {}s per: ".format(number_needed, unit.name, unit.name))
+        print(probs)
+        print("Expected number of shop slots to hit {} {}s per: ".format(number_needed, unit.name, unit.name))
+        print(rolls)
+        print("Expected total number of shop slots to hit {} {}s: ".format(number_needed, unit.name))
+        print(sum(rolls))
+        print("Expected total number of shops to hit {} {}s: ".format(number_needed, unit.name))
+        print(sum(rolls)/5)
     # confidence interval/distribution?
 
-    return rolls
+    return round(sum(rolls)/5)
 
 
 def load_units(): 
@@ -116,7 +130,7 @@ def load_shop_odds():
 
     shop_odds = list()
 
-    print(data['data']['Shop'][0])
+    # print(data['data']['Shop'][0])
 
     for level in data['data']['Shop']:
 
