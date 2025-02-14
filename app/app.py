@@ -28,8 +28,12 @@ app.layout = html.Div([
     html.Div(
         children=[
             html.Hr(),
+            html.P('Name of Unit'),
+            dcc.Input(placeholder='Unit name', type='text', id='unit-name'),
+            html.P('Cost of desired unit'),
+            dcc.RadioItems(options=[1, 2, 3, 4, 5], inline=True, id='unit-cost'),
             html.P('Star level of desired unit'),
-            dcc.RadioItems(options=[1, 2, 3], value=2, inline=True, id='star-level'),
+            dcc.RadioItems(options=[1, 2, 3], inline=True, id='star-level'),
             html.P('Level'),
             dcc.Input(placeholder='Integer (0-10)', type='number', id='level'),
             html.P('Number of desired unit already purchased'),
@@ -50,22 +54,25 @@ app.layout = html.Div([
 @callback(
     Output(component_id='roll-string', component_property='children'),
     Input(component_id='submit-val', component_property='n_clicks'),
+    State(component_id='unit-name', component_property='value'),
+    State(component_id='unit-cost', component_property='value'),
     State(component_id='star-level', component_property='value'),
     State(component_id='nteam', component_property='value'),
     State(component_id='nother', component_property='value'),
     State(component_id='level', component_property='value'),
     prevent_initial_call=True
 )
-def update_number_of_shops(n_clicks, star_level, nteam, nother, level):
+def update_number_of_shops(n_clicks, unit_name, cost, star_level, nteam, nother, level):
 
     text = 'Enter a value and press submit'
 
     # print(button)
 
     if n_clicks > 0:
-        text = 'Number of shops until Jinx 2 star: {}'.format(
+        text = 'Number of shops until {} 2 star: {}'.format(
+            unit_name,
             number_shops(
-                Unit("Jinx",5), 
+                Unit(unit_name, cost), 
                 nteam=nteam, 
                 npool=pool.size(5)-nteam-nother, 
                 nother=nother, 
