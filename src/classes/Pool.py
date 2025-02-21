@@ -1,6 +1,6 @@
-from Unit import Unit
+from .Unit import Unit
 import numpy as np
-from util import load_units
+from .util import load_units
 
 class Pool():
 

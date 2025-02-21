@@ -1,16 +1,9 @@
 import unittest
 import numpy as np
-import sys
-import os
 import copy
-
-
-current_file_path = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file_path)
-sys.path.append(os.path.join(current_directory, '../code'))
-from Unit import Unit
-from Pool import Pool
-from Shop import Shop
+from .Unit import Unit
+from .Pool import Pool
+from .Shop import Shop
 
 
 class TestUnit(unittest.TestCase):
@@ -125,23 +118,23 @@ class TestShop(unittest.TestCase):
 
                 self.assertEqual(unit.cost, i+1, 'Probability of getting a unit of a specific cost working incorrectly')
 
-class TestUtil(unittest.TestCase):
+# class TestUtil(unittest.TestCase):
 
-    def setUp(self):
+#     def setUp(self):
 
-        self.pool = Pool()
+#         self.pool = Pool()
 
-    #     self.unit = Unit('Amumu', 1)
-    #     self.nteam = 0
-    #     self.npool = 30
-    #     self.nother = 0
-    #     self.star = 1
-    #     self.level = 1
-    #     self.shop = Shop(1)
+#     #     self.unit = Unit('Amumu', 1)
+#     #     self.nteam = 0
+#     #     self.npool = 30
+#     #     self.nother = 0
+#     #     self.star = 1
+#     #     self.level = 1
+#     #     self.shop = Shop(1)
 
-    def test_edge_cases(self):
+#     def test_edge_cases(self):
 
-        self.assertEqual()
+#         self.assertEqual()
 
 
 

@@ -1,20 +1,10 @@
 # Import packages
-from dash import Dash, html, dash_table, dcc, callback, Output, Input, State, ctx
-import pandas as pd
+from dash import Dash, html, dcc, callback, Output, Input, State, ctx
 import plotly.express as px
-import sys
-import os
-
-current_file_path = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file_path)
-sys.path.append(os.path.join(current_directory, '../code'))
-
-print(os.path.join(os.getcwd(),'../code'))
-
-from Unit import Unit
-from Pool import Pool
-from Shop import Shop
-from util import number_shops
+from classes.Unit import Unit
+from classes.Pool import Pool
+from classes.Shop import Shop
+from classes.util import number_shops
 
 pool = Pool()
 shops = [Shop(i) for i in range(1,12)]
@@ -22,6 +12,8 @@ shops = [Shop(i) for i in range(1,12)]
 # Initialize the app - incorporate css
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets)
+
+server = app.server
 
 app.layout = html.Div([
     html.Div(className='row',children='TFT: Expected Number of Rolls', style = {'textAlign': 'center', 'fontSize': 30}),
@@ -69,8 +61,9 @@ def update_number_of_shops(n_clicks, unit_name, cost, star_level, nteam, nother,
     # print(button)
 
     if n_clicks > 0:
-        text = 'Number of shops until {} 2 star: {}'.format(
+        text = 'Number of shops until {} {} star: {}'.format(
             unit_name,
+            star_level,
             number_shops(
                 Unit(unit_name, cost), 
                 nteam=nteam, 
@@ -86,4 +79,5 @@ def update_number_of_shops(n_clicks, unit_name, cost, star_level, nteam, nother,
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run_server(debug=True, host='0.0.0.0', port=8080)

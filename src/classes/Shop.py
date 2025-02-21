@@ -1,7 +1,7 @@
-from Unit import Unit
-from Pool import Pool
+from .Unit import Unit
+from .Pool import Pool
 import numpy as np
-from util import load_shop_odds
+from .util import load_shop_odds
 
 class Shop():
 
