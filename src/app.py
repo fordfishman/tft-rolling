@@ -19,6 +19,7 @@ shops = [Shop(i) for i in range(1,12)]
 # Initialize the app - incorporate css
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets)
+app.title = "TFT: Expected Number of Rolls"
 
 server = app.server
 
