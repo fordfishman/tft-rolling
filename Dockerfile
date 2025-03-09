@@ -22,8 +22,8 @@ USER app
 # webserver, with one worker process and 8 threads.
 # For environments with multiple CPU cores, increase the number of workers
 # to be equal to the cores available in Cloud Run.
-# EXPOSE 8000
+EXPOSE 8080
 # CMD ['exec gunicorn' '--bind :$PORT' '--log-level info' '--workers 1' '--threads 8' '--timeout 0' 'app:server']
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--log-level", "info", "--workers", "1", "--threads", "8", "--timeout", "0", "src.app:server"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--log-level", "info", "--workers", "1", "--threads", "8", "--timeout", "0", "src.app:server"]
 
-# CMD ["gunicorn"  , "-b", "0.0.0.0:8000", "src.app:server"]
+# CMD ["gunicorn"  , "-b", "0.0.0.0:8080", "src.app:server"]
