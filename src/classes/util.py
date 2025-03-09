@@ -49,10 +49,16 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
 
     cost_odd = odds[cost-1]
 
+    if cost_odd == 0:
+
+        return "Level too low to find {} cost unit".format(cost)
+
     nleft = ntot[cost-1] - nteam - nother # number
 
     if nleft <= 0:
         return "Not enough units left in pool"
+
+    
 
     probs = []
     rolls = []

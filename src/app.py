@@ -39,6 +39,8 @@ app.layout = html.Div([
             dcc.Input(placeholder='Integer (0-8)', type='number', id='nteam'),
             html.P('Number of desired unit on other boards and benches'),
             dcc.Input(placeholder='Integer (0+)', type='number', id='nother'),
+            html.P('Number of others units of the same cost out of the pool'),
+            dcc.Input(placeholder='Integer (0+)', type='number', id='npool'),
             html.Br(),
             html.Br(),
             html.Div(
@@ -58,10 +60,11 @@ app.layout = html.Div([
     State(component_id='star-level', component_property='value'),
     State(component_id='nteam', component_property='value'),
     State(component_id='nother', component_property='value'),
+    State(component_id='npool', component_property='value'),
     State(component_id='level', component_property='value'),
     prevent_initial_call=True
 )
-def update_number_of_shops(n_clicks, unit_name, cost, star_level, nteam, nother, level):
+def update_number_of_shops(n_clicks, unit_name, cost, star_level, nteam, nother, npool, level):
 
     text = 'Enter a value and press submit'
 
@@ -74,11 +77,11 @@ def update_number_of_shops(n_clicks, unit_name, cost, star_level, nteam, nother,
             number_shops(
                 Unit(unit_name, cost), 
                 nteam=nteam, 
-                npool=pool.size(5)-nteam-nother, 
+                npool=pool.size(cost), 
                 nother=nother, 
                 star=star_level,
                 level=level, 
-                shop=shops[9]
+                shop=shops[level-1]
                 )
             )
 
