@@ -1,10 +1,17 @@
+# import sys
+# import os
+
+# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(SCRIPT_DIR))
+
+
 # Import packages
 from dash import Dash, html, dcc, callback, Output, Input, State, ctx
 import plotly.express as px
-from classes.Unit import Unit
-from classes.Pool import Pool
-from classes.Shop import Shop
-from classes.util import number_shops
+from .classes.Unit import Unit
+from .classes.Pool import Pool
+from .classes.Shop import Shop
+from .classes.util import number_shops
 
 pool = Pool()
 shops = [Shop(i) for i in range(1,12)]
