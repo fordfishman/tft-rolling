@@ -96,6 +96,7 @@ env:
   GAR_LOCATION: us-east1 # TODO: update Artifact Registry location
   REGION: us-east1 # TODO: update Cloud Run service region
   APP: app
+  SERVICE: tft-rolling
 
 jobs:
   deploy:
