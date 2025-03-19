@@ -87,8 +87,7 @@ name: Build app and create a release in Cloud Deploy
 on:
   push:
     branches:
-      # - main
-      - gh-actions
+      - main
 
 env:
   PROJECT_ID: tft-rolling-probability # TODO: update Google Cloud project id
