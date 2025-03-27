@@ -26,10 +26,10 @@ class TestPool(unittest.TestCase):
 
     def test_pool_size(self):
 
-        num_cost = (14, 13, 13, 12, 8, 3)
-        bag_sizes = (30, 25, 18, 10, 9, 9)
+        num_cost = (14, 13, 13, 12, 8)
+        bag_sizes = (30, 25, 18, 10, 9)
 
-        for i in range(1, 7): # testing that each pool size is correct
+        for i in range(1, 6): # testing that each pool size is correct
             self.assertEqual(self.pool.size(i), num_cost[i-1]*bag_sizes[i-1], 'Pool size for {} cost not correct'.format(i))
 
         # testing total pool size is correct
@@ -37,7 +37,7 @@ class TestPool(unittest.TestCase):
        
     def test_get_unit(self):
     
-        for i in range(1, 7): # testing that removing a unit from each cost reduces pool size
+        for i in range(1, 6): # testing that removing a unit from each cost reduces pool size
             cost_pool_size = self.pool.size(i)
             unit = self.pool.get_unit(i)
             # self.assertEqual(unit.cost, i, 'Unit cost not correct')
@@ -46,7 +46,7 @@ class TestPool(unittest.TestCase):
 
     def test_return_unit(self):
 
-        for i in range(1, 7):
+        for i in range(1, 6):
 
             cost_pool_size = self.pool.size(i)
             unit = self.pool.get_unit(i)
@@ -55,11 +55,11 @@ class TestPool(unittest.TestCase):
 
     def test_odds(self):
 
-        example_units = (Unit('Amumu', 1), Unit('Vander', 2), Unit('Smeech', 3), Unit('Corki', 4), Unit('Sevika', 5), Unit('Viktor', 6))
-        num_cost = (14, 13, 13, 12, 8, 3)
-        bag_sizes = (30, 25, 18, 10, 9, 9)
+        example_units = (Unit('Amumu', 1), Unit('Vander', 2), Unit('Smeech', 3), Unit('Corki', 4), Unit('Sevika', 5))
+        num_cost = (14, 13, 13, 12, 8)
+        bag_sizes = (30, 25, 18, 10, 9)
 
-        for i in range(1, 7):
+        for i in range(1, 6):
 
             unit_test = example_units[i-1]
             odds_before = self.pool.get_odds(unit_test)
@@ -91,7 +91,7 @@ class TestShop(unittest.TestCase):
 
             odds = shop.odds[i]
 
-            self.assertEqual(odds.shape[0], 6, 'Not enough odds for 6 costs')
+            self.assertEqual(odds.shape[0], 5, 'Not enough odds for 5 costs')
             self.assertAlmostEqual(np.sum(odds), 1, 7,'Odds do not sum to 1')
 
     def test_fresh_shop(self):
@@ -107,9 +107,9 @@ class TestShop(unittest.TestCase):
             self.assertIsInstance(unit, Unit, 'Slot does not contain a unit')
 
         
-        for i in range(6):
+        for i in range(5):
         
-            shop.odds[7] = np.zeros(6)
+            shop.odds[7] = np.zeros(5)
             shop.odds[7][i] = 1
 
             shop.refresh_shop(self.pool)

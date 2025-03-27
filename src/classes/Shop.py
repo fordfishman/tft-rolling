@@ -17,7 +17,7 @@ class Shop():
 
         for i in range(5):
 
-            cost = np.random.choice(range(1,7), p=odds)
+            cost = np.random.choice(range(1,6), p=odds)
 
             self.slots[i] = pool.get_unit(cost)
         

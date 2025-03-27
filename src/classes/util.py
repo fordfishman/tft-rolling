@@ -1,6 +1,15 @@
 import numpy as np
 import requests
 import json
+import enum
+
+class BagSizes(enum.Enum):
+    
+    _1COST = 30
+    _2COST = 25
+    _3COST = 18
+    _4COST = 10
+    _5COST = 9
 
 
 def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=False):
@@ -40,7 +49,7 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
 
     cost = unit.cost
 
-    ntot = [30, 25, 18, 10, 9, 9]
+    ntot = [ cost.value for cost in BagSizes ]
 
     # level shouldn't matter for this
     all_odds = shop.odds
@@ -92,7 +101,7 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
     return round(sum(rolls)/5)
 
 
-def load_units(): 
+def load_units(set_='13'): 
     """
     Load CDragon TFT JSON data 
 
@@ -108,9 +117,9 @@ def load_units():
 
     units = dict()
 
-    for unit in data['sets']['13']['champions']:
+    for unit in data['sets'][set_]['champions']:
     
-        if unit['cost'] <= 6 and len(unit['traits'])>0:
+        if unit['cost'] <= 5 and len(unit['traits'])>0:
 
             if unit['cost'] not in units.keys():
                 units[unit['cost']] = [unit['name']]
@@ -124,7 +133,6 @@ def load_shop_odds():
 
     """
     Grab shop odds from DDragon
-    May need to update with 6 costs or other changes
     """
 
     # url to DDragon for TFT latest patch
@@ -140,7 +148,7 @@ def load_shop_odds():
 
     for level in data['data']['Shop']:
 
-        level_drop_rates = level['dropRatesByTier']
+        level_drop_rates = level['dropRatesByTier'][0:5]
 
         odds_array = np.array([ cost['rate'] for cost in level_drop_rates ])/100
         shop_odds.append(odds_array)
