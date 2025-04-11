@@ -1,7 +1,8 @@
-import numpy as np
 import requests
 import json
 import enum
+import numpy as np
+import plotly.express as px
 
 class BagSizes(enum.Enum):
     
@@ -12,7 +13,7 @@ class BagSizes(enum.Enum):
     _5COST = 9
 
 
-def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=False):
+def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=False, round_to_int=True):
     """
     Calculates the expected number
     of shops until you hit an upgrade (2 or
@@ -60,14 +61,12 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
 
     if cost_odd == 0:
 
-        return "Level too low to find {} cost unit".format(cost)
+        return f"Level too low to find {cost} cost unit"
 
     nleft = ntot[cost-1] - nteam - nother # number
 
-    if nleft <= 0:
+    if nleft <= 0 or nleft < nneeded:
         return "Not enough units left in pool"
-
-    
 
     probs = []
     rolls = []
@@ -88,20 +87,100 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
 
     if not disable_print:
 
-        print("Probability per shop slot for hitting {} {}s per: ".format(number_needed, unit.name, unit.name))
+        print(f"Probability per shop slot for hitting {number_needed} {unit.name}'s per: ")
         print(probs)
-        print("Expected number of shop slots to hit {} {}s per: ".format(number_needed, unit.name, unit.name))
+        print(f"Expected number of shop slots to hit {number_needed} {unit.name}'s per: ")
         print(rolls)
-        print("Expected total number of shop slots to hit {} {}s: ".format(number_needed, unit.name))
+        print(f"Expected total number of shop slots to hit {number_needed} {unit.name}s: ")
         print(sum(rolls))
-        print("Expected total number of shops to hit {} {}s: ".format(number_needed, unit.name))
+        print(f"Expected total number of shops to hit {number_needed} {unit.name}s: ")
         print(sum(rolls)/5)
     # confidence interval/distribution?
+    
+    if round_to_int:
+        return round(sum(rolls)/5)
+    else:
 
-    return round(sum(rolls)/5)
+        return round(sum(rolls)/5, 2)
 
 
-def load_units(set_='13'): 
+def n_other_shop_distribution(unit, nteam, npool, star, level, shop):
+    
+    cost = unit.cost
+    
+    ntot = [ cost.value for cost in BagSizes ][cost-1]
+        
+    n_not_on_team = ntot - nteam
+    
+    shops = [ 
+             number_shops(
+                 unit, 
+                 nteam, 
+                 npool - n, 
+                 n, 
+                 star, 
+                 level, 
+                 shop, 
+                 disable_print=True, 
+                 round_to_int=False) 
+             for n in range(1, n_not_on_team)
+             ]
+    
+    n_left = n_not_on_team - np.arange(1, n_not_on_team)
+    
+    shops_for_plot = [ rolls for rolls in shops]
+    n_left = n_left[:len(shops_for_plot)].astype(str)
+    
+    fig = px.line(x=n_left, y=shops_for_plot)
+    fig.update_layout(
+        xaxis_title=f"# of {unit.name}'s left in pool",
+        yaxis_title="Expected # of shops",
+        title="Effect of # left in pool on expected # of shops",
+        template="simple_white"
+    )
+    fig.update_traces(hovertemplate="# Left: %{x}<br>Expected # Shops: %{y}")
+    
+    return fig
+
+def n_pool_shop_distribution(unit, nteam, nother, star, level, shop, units_per_cost):
+    
+    cost = unit.cost
+    
+    ntot = [ cost.value for cost in BagSizes ][cost-1]
+    
+    ncost = ntot*units_per_cost
+        
+    shops = [ 
+             number_shops(
+                 unit, 
+                 nteam, 
+                 n, 
+                 nother, 
+                 star, 
+                 level, 
+                 shop, 
+                 disable_print=True, 
+                 round_to_int=False) 
+             for n in range(ntot, ncost)
+             ]
+    
+    shops_for_plot = [ rolls for rolls in shops ]
+    n_pool = np.arange(ntot, ncost) - ntot
+    shops_for_plot.reverse()
+    n_pool = n_pool[::-1]
+    
+    fig = px.line(x=n_pool, y=shops_for_plot)
+    fig.update_layout(
+        xaxis_title=f"# of other {cost}-costs left in pool",
+        yaxis_title="Expected # of shops",
+        title=f"Effect of {cost}-cost pool size on expected # of shops",
+        template="simple_white"
+    )
+    fig.update_traces(hovertemplate="# Left: %{x}<br>Expected # Shops: %{y}")
+    
+    return fig
+
+def load_units(set_='14'): 
     """
     Load CDragon TFT JSON data 
 
