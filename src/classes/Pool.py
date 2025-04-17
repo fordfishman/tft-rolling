@@ -1,35 +1,33 @@
 from .Unit import Unit
 import numpy as np
-from .util import load_units
+from .util import load_units, BagSizes
 
 class Pool():
 
     def __init__(self) -> None:
         self.units = {i:[] for i in range(1,7)}
+        self.unit_dict = load_units()
         self.new_game()
 
 
 
     def new_game(self) -> None:
-        unit_dict = load_units()
         
-        for i in range(30):
-            self.units[1] += [Unit(unit_name, cost=1) for unit_name in unit_dict[1]]
+        for i in range(BagSizes._1COST.value):
+            self.units[1] += [Unit(unit_name, cost=1) for unit_name in self.unit_dict[1]]
         
-        for i in range(25):
-            self.units[2] += [Unit(unit_name, cost=2) for unit_name in unit_dict[2]]
+        for i in range(BagSizes._2COST.value):
+            self.units[2] += [Unit(unit_name, cost=2) for unit_name in self.unit_dict[2]]
 
-        for i in range(18):
-            self.units[3] += [Unit(unit_name, cost=3) for unit_name in unit_dict[3]]
+        for i in range(BagSizes._3COST.value):
+            self.units[3] += [Unit(unit_name, cost=3) for unit_name in self.unit_dict[3]]
             
-        for i in range(10):
-            self.units[4] += [Unit(unit_name, cost=4) for unit_name in unit_dict[4]]
+        for i in range(BagSizes._4COST.value):
+            self.units[4] += [Unit(unit_name, cost=4) for unit_name in self.unit_dict[4]]
 
-        for i in range(9):
-            self.units[5] += [Unit(unit_name, cost=5) for unit_name in unit_dict[5]]
+        for i in range(BagSizes._5COST.value):
+            self.units[5] += [Unit(unit_name, cost=5) for unit_name in self.unit_dict[5]]
         
-        for i in range(9):
-            self.units[6] += [Unit(unit_name, cost=6) for unit_name in unit_dict[6]]
         
         return None
 
@@ -55,7 +53,7 @@ class Pool():
         """
         Returns size of pool
         ---------------------------
-        cost (int): If 1, 2, 3, 4, 5, or 6 is 
+        cost (int): If 1, 2, 3, 4, or 5, is 
             provided, will return the size of the 
             pool for that cost only. When None (default), 
             returns size of whole pool.
