@@ -13,7 +13,7 @@ import plotly.express as px
 from .classes.Unit import Unit
 from .classes.Pool import Pool
 from .classes.Shop import Shop
-from .classes.util import number_shops, n_other_shop_distribution, n_pool_shop_distribution
+from .classes.util import number_shops, cdf_plot, n_other_shop_distribution, n_pool_shop_distribution
 
 pool = Pool()
 shops = [Shop(i) for i in range(1,12)]
@@ -90,7 +90,7 @@ controls = html.Div([
             html.Br(),
             html.P("Number of desired unit you've already purchased"),
             dcc.Dropdown(
-                options=list(range(8)), 
+                options=list(range(9)), 
                 value=0, 
                 id='nteam'),
             html.Br(),
@@ -133,10 +133,14 @@ output = dbc.Card(
         dbc.Container(
             dbc.Tabs([
                 dbc.Tab(
-                    dcc.Graph(id='n-other-plot'), 
+                    dcc.Graph(id='roll-prob-plot', config = {'displayModeBar': False}), 
+                    label='Roll Probability',
+                    ),
+                dbc.Tab(
+                    dcc.Graph(id='n-other-plot', config = {'displayModeBar': False}), 
                     label='Units Held'),
                 dbc.Tab(
-                    dcc.Graph(id='n-pool-plot'),
+                    dcc.Graph(id='n-pool-plot', config = {'displayModeBar': False}),
                     label='Pool Size'
                     )
             ])
@@ -154,6 +158,7 @@ app.layout = dbc.Container([
         dbc.Col(output, width=8)  
         ]),
     ])
+
 @callback(
     Output(component_id='roll-string', component_property='children'),
     Input(component_id='submit-val', component_property='n_clicks'),
@@ -188,6 +193,45 @@ def update_number_of_shops(n_clicks, unit_data, star_level, nteam, nother, n_out
     return text
 
 @callback(
+    Output(component_id='roll-prob-plot', component_property='figure'),
+    Input(component_id='submit-val', component_property='n_clicks'),
+    State(component_id='selected-unit', component_property='data'),
+    State(component_id='star-level', component_property='value'),
+    State(component_id='nteam', component_property='value'),
+    State(component_id='nother', component_property='value'),
+    State(component_id='n_out_of_pool', component_property='value'),
+    State(component_id='level', component_property='value'),
+)
+def roll_probability(n_clicks, unit_data, star_level, nteam, nother, n_out_of_pool, level):
+    
+    if n_clicks > 0:
+        
+        unit_data = json.loads(unit_data)
+        fig = cdf_plot(
+            Unit(unit_data['unit_name'], unit_data['cost']), 
+            nteam=nteam, 
+            npool=pool.size(unit_data['cost']) - n_out_of_pool - nteam - nother, 
+            nother=nother, 
+            star=star_level,
+            level=level, 
+            shop=shops[level-1]
+        )
+    
+    else:
+        
+        fig = px.bar()
+        fig.update_layout(
+            xaxis_title="Shop rolls",
+            yaxis_title="Probability of hitting",
+            title="Probability of hitting a unit as you roll",
+            template="simple_white",
+            font_size=14,
+            title_font_size=20,
+        )
+
+    return fig
+
+@callback(
     Output(component_id='n-other-plot', component_property='figure'),
     Input(component_id='submit-val', component_property='n_clicks'),
     State(component_id='selected-unit', component_property='data'),
@@ -209,12 +253,14 @@ def n_other_plot(n_clicks, unit_data, star_level, nteam, n_out_of_pool, level):
             shop=shops[level-1]
         )
     else:
-        fig = px.line()
+        fig = px.bar()
         fig.update_layout(
             xaxis_title="# of unit left in pool",
             yaxis_title="Expected # of shops",
             title="Effect of # left in pool on expected # of shops",
-            template="simple_white"
+            template="simple_white",
+            font_size=14,
+            title_font_size=20,
         )
         fig.update_traces(hovertemplate="# Left: %{x}<br>Expected # Shops: %{y}")
    
@@ -244,12 +290,14 @@ def n_pool_plot(n_clicks,unit_data, star_level, nteam, nother, level):
             units_per_cost=len(set(unit.name for unit in pool.units[unit_data['cost']]))
         )
     else:
-        fig = px.line()
+        fig = px.bar()
         fig.update_layout(
             xaxis_title="# of other same-costs left in pool",
             yaxis_title="Expected # of shops",
             title="Effect of same-cost pool size on expected # of shops",
-            template="simple_white"
+            template="simple_white",       
+            font_size=14,
+            title_font_size=20,
         )
         fig.update_traces(hovertemplate="# Left: %{x}<br>Expected # Shops: %{y}")
     return fig

@@ -3,6 +3,9 @@ import json
 import enum
 import numpy as np
 import plotly.express as px
+from scipy.signal import convolve
+from scipy.stats import geom
+
 
 class BagSizes(enum.Enum):
     
@@ -12,6 +15,34 @@ class BagSizes(enum.Enum):
     _4COST = 10
     _5COST = 9
 
+def process_state(unit, nteam, nother, star, level, shop):
+    
+    if nteam >= 9:
+        nneeded = 0
+
+    if star == 3:
+        nneeded = 9 - nteam
+
+    elif star == 2:
+        nneeded = 3 - nteam % 3
+    
+    elif star == 1:
+        nneeded = 1
+        
+    cost = unit.cost
+
+    ntot = [ cost.value for cost in BagSizes ]
+
+    # level shouldn't matter for this
+    all_odds = shop.odds
+    
+    odds = all_odds[level-1]
+
+    cost_odd = odds[cost-1]
+
+    nleft = ntot[cost-1] - nteam - nother # number left in pool
+    
+    return nneeded, nleft, cost, cost_odd
 
 def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=False, round_to_int=True):
     """
@@ -33,37 +64,17 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
     shop (Shop): Current shop
     
     """
+    
+    nneeded, nleft, cost, cost_odd = process_state(unit, nteam, nother, star, level, shop)
 
-    if nteam >= 9:
+    if nneeded == 0:
         return "Unit is already 3 starred"
 
-    if star == 3:
-        nneeded = 9 - nteam
-
-    elif star == 2:
-        nneeded = 3 - nteam % 3
-    
-    elif star == 1:
-        nneeded = 1
-
     number_needed = nneeded # for printing
-
-    cost = unit.cost
-
-    ntot = [ cost.value for cost in BagSizes ]
-
-    # level shouldn't matter for this
-    all_odds = shop.odds
-    
-    odds = all_odds[level-1]
-
-    cost_odd = odds[cost-1]
 
     if cost_odd == 0:
 
         return f"Level too low to find {cost} cost unit"
-
-    nleft = ntot[cost-1] - nteam - nother # number
 
     if nleft <= 0 or nleft < nneeded:
         return "Not enough units left in pool"
@@ -103,6 +114,79 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
 
         return round(sum(rolls)/5, 2)
 
+def cdf_plot(unit, nteam, npool, nother, star, level, shop):
+    # https://www.statlect.com/fundamentals-of-probability/sums-of-independent-random-variables
+    return_blank = False
+
+    nneeded, nleft, _, cost_odd = process_state(unit, nteam, nother, star, level, shop)  
+    
+    if nneeded ==0 or cost_odd == 0 or nleft <= 0 or nleft < nneeded:
+        return_blank = True
+    
+    if return_blank:
+        
+        return px.bar(
+            x=[0],
+            y=[0],
+        )
+    
+    max_rolls = 1000
+    
+    rolls = np.arange(1, max_rolls)
+    
+    p = nleft / npool * cost_odd
+    pmf = geom.pmf(rolls, p)
+    
+    nleft -= 1
+    nneeded -= 1
+    npool -= 1
+    
+    while nneeded > 0:
+        
+        p = nleft / npool * cost_odd
+        pmf_i = geom.pmf(rolls, p)
+        pmf = convolve(pmf, pmf_i, method='direct')
+        
+        nleft -= 1
+        nneeded -= 1
+        npool -= 1
+    
+    cdf = list()
+
+    for i in range(5,len(pmf),5):
+        cdf.append(sum(pmf[0:i+1])*100)
+        
+    fig = px.bar(x=np.arange(1, len(cdf)+1), y=cdf)
+    fig.update_layout(
+        title=f"Probability of hitting {star}-star {unit.name} as you roll",
+        template="simple_white",
+        hovermode="x",
+        hoverlabel_font_size=16,
+        font_size=14,
+        title_font_size=20,
+        dragmode=False
+    )
+    fig.update_xaxes(
+        title_text="Shop rolls",
+        range=[0, 100],
+        tick0=0,
+        dtick=20,
+        showspikes=True, 
+        spikesnap="cursor", 
+        spikemode="across",
+        spikethickness=0.5,
+        )
+    fig.update_yaxes(
+        title_text="Probability of hitting",
+        ticksuffix= "%",
+        # range=[0, 105]
+    )
+    fig.update_traces(
+        hovertemplate="# of shop rolls: %{x}<br>Probability of hitting: %{y:.2f}%",
+        marker_color='white', marker_line_color='blue')
+    
+    return fig
+
 
 def n_other_shop_distribution(unit, nteam, npool, star, level, shop):
     
@@ -131,14 +215,27 @@ def n_other_shop_distribution(unit, nteam, npool, star, level, shop):
     shops_for_plot = [ rolls for rolls in shops]
     n_left = n_left[:len(shops_for_plot)].astype(str)
     
-    fig = px.line(x=n_left, y=shops_for_plot)
+    fig = px.bar(x=n_left, y=shops_for_plot)
     fig.update_layout(
         xaxis_title=f"# of {unit.name}'s left in pool",
         yaxis_title="Expected # of shops",
         title="Effect of # left in pool on expected # of shops",
-        template="simple_white"
+        template="simple_white",
+        dragmode=False,
+        hovermode="x",
+        hoverlabel_font_size=16,
+        font_size=14,
+        title_font_size=20,
     )
-    fig.update_traces(hovertemplate="# Left: %{x}<br>Expected # Shops: %{y}")
+    fig.update_xaxes(
+        showspikes=True, 
+        spikesnap="cursor", 
+        spikemode="across",
+        spikethickness=0.5,
+    )
+    fig.update_traces(
+        hovertemplate="# left: %{x}<br>Expected # of shops: %{y}",
+        marker_color='white', marker_line_color='blue', marker_line_width=1.5)
     
     return fig
 
@@ -169,14 +266,28 @@ def n_pool_shop_distribution(unit, nteam, nother, star, level, shop, units_per_c
     shops_for_plot.reverse()
     n_pool = n_pool[::-1]
     
-    fig = px.line(x=n_pool, y=shops_for_plot)
+    fig = px.bar(x=n_pool, y=shops_for_plot)
     fig.update_layout(
         xaxis_title=f"# of other {cost}-costs left in pool",
         yaxis_title="Expected # of shops",
         title=f"Effect of {cost}-cost pool size on expected # of shops",
-        template="simple_white"
+        template="simple_white",
+        dragmode=False,
+        hovermode="x",
+        hoverlabel_font_size=16,
+        font_size=14,
+        title_font_size=20,
     )
-    fig.update_traces(hovertemplate="# Left: %{x}<br>Expected # Shops: %{y}")
+    fig.update_xaxes(
+        showspikes=True, 
+        spikesnap="cursor", 
+        spikemode="across",
+        spikethickness=0.5,
+    )
+    fig.update_traces(
+        hovertemplate="# left: %{x}<br>Expected # of shops: %{y}",
+        marker_color='white', marker_line_color='blue'
+    )
     
     return fig
 
