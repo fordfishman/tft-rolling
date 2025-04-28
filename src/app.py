@@ -1,32 +1,27 @@
-# import sys
-# import os
-
-# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-
-# Import packages
 import json
+import plotly.express as px
 from dash import Dash, html, dcc, callback, Output, Input, State, ctx, ALL, no_update
 import dash_bootstrap_components as dbc
-import plotly.express as px
 from .classes.Unit import Unit
 from .classes.Pool import Pool
 from .classes.Shop import Shop
 from .classes.util import number_shops, cdf_plot, n_other_shop_distribution, n_pool_shop_distribution
 
-pool = Pool()
-shops = [Shop(i) for i in range(1,12)]
-
 # Initialize the app - incorporate css
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "TFT Rolling: Expected Number of Rolls"
+app.title = "TFT Rolling: Probability of Hitting a Unit"
 
 server = app.server
 
+# Initialize game state
+pool = Pool()
+shops = [Shop(i) for i in range(1,12)]
+
 cost_colors = ['secondary', 'success','primary', '4-cost', 'warning']
 
+
+# Unit selection buttons
 unit_collapse_buttons = html.Div(
     dbc.Container(
         [ 
@@ -42,7 +37,6 @@ unit_collapse_buttons = html.Div(
         ]
     )
 )
-
 collapse_group = dbc.Container([
     dbc.Collapse([
         dbc.Button(
@@ -63,6 +57,7 @@ collapse_group = dbc.Container([
     for i in range (1, 6)
 ])
 
+# Inputs to describe game state
 controls = html.Div([
     html.Div(
         children=[
@@ -122,6 +117,7 @@ controls = html.Div([
     )
 ])
 
+# Output information and graphs
 output = dbc.Card(
     [
         dbc.Container([
@@ -129,7 +125,6 @@ output = dbc.Card(
             html.Div(id='roll-string', children=''),
             html.Br(),
             ]),
-        # dbc.CardHeader()
         dbc.Container(
             dbc.Tabs([
                 dbc.Tab(
@@ -145,11 +140,9 @@ output = dbc.Card(
                     )
             ])
         )
-        
     ])
 
-
-
+# define layout
 app.layout = dbc.Container([
     html.Div(className='row',children='TFT: Expected Number of Rolls', style = {'textAlign': 'center', 'fontSize': 30}),
     html.Hr(),
@@ -169,7 +162,25 @@ app.layout = dbc.Container([
     State(component_id='n_out_of_pool', component_property='value'),
     State(component_id='level', component_property='value'),
 )
-def update_number_of_shops(n_clicks, unit_data, star_level, nteam, nother, n_out_of_pool, level):
+def update_number_of_shops(n_clicks:int, unit_data:str, star_level:int, nteam:int, nother:int, n_out_of_pool:int, level:int)->str:
+    """
+    Callback running classes.util.number_shops() to calculate the expected number of shops given 
+    the inputs from the user. The function returns a string to be displayed in the output
+    panel in the roll-string div.
+    
+    Args:
+        n_clicks (int): How many times the submit button has been clicked
+        unit_data (str): json string of unit data, comes from the selected unit button
+        star_level (int): Star level of the unit, reads from star-level dropdown
+        nteam (int): The number of the selected unit you have on your team, input from the nteam dropdown
+        nother (int): The number of the selected unit on other boards and benches, input from the nother input
+        n_out_of_pool (int): The number of units of the same cost as the desired unit that are out of the pool, 
+            input from the n_out_of_pool input
+        level (int): Your team level, input from the level dropdown
+
+    Returns:
+        str: The expected number of shops until the desired unit is hit, formatted as a string
+    """
     
     text = 'Expected # of shops:'
 
@@ -186,7 +197,7 @@ def update_number_of_shops(n_clicks, unit_data, star_level, nteam, nother, n_out
                 star=star_level,
                 level=level, 
                 shop=shops[level-1],
-                disable_print=True
+                round_to_int=True
                 )
             )
 
@@ -202,7 +213,25 @@ def update_number_of_shops(n_clicks, unit_data, star_level, nteam, nother, n_out
     State(component_id='n_out_of_pool', component_property='value'),
     State(component_id='level', component_property='value'),
 )
-def roll_probability(n_clicks, unit_data, star_level, nteam, nother, n_out_of_pool, level):
+def roll_probability(n_clicks:int, unit_data:str, star_level:int, nteam:int, nother:int, n_out_of_pool:int, level:int):
+    """
+    Callback running classes.util.cdf_plot() to display CDF for the probability of hitting the desired unit
+    star level after a certain number of rolls. Please see classes.util.cdf_plot() for more details on the how
+    the CDF is calculated. 
+    
+    Args:
+        n_clicks (int): How many times the submit button has been clicked
+        unit_data (str): json string of unit data, comes from the selected unit button
+        star_level (int): Star level of the unit, reads from star-level dropdown
+        nteam (int): The number of the selected unit you have on your team, input from the nteam dropdown
+        nother (int): The number of the selected unit on other boards and benches, input from the nother input
+        n_out_of_pool (int): The number of units of the same cost as the desired unit that are out of the pool, 
+            input from the n_out_of_pool input
+        level (int): Your team level, input from the level dropdown
+
+    Returns:
+        plotly.graph_objects._figure.Figure: CDF barplot of the probability of hitting the desired unit
+    """
     
     if n_clicks > 0:
         
@@ -240,7 +269,25 @@ def roll_probability(n_clicks, unit_data, star_level, nteam, nother, n_out_of_po
     State(component_id='n_out_of_pool', component_property='value'),
     State(component_id='level', component_property='value'),
 )
-def n_other_plot(n_clicks, unit_data, star_level, nteam, n_out_of_pool, level):
+def n_other_plot(n_clicks:int, unit_data:str, star_level:int, nteam:int, n_out_of_pool:int, level:int):
+    """
+    Callback running classes.util.n_other_shop_distribution() to display the expected number of shops
+    until the desired unit star level is hit as the copies of this unit in the pool changes. Please see
+    classes.util.n_other_shop_distribution() for more details on the how the expected number of shops is calculated.
+
+    Args:
+        n_clicks (int): How many times the submit button has been clicked
+        unit_data (str): json string of unit data, comes from the selected unit button
+        star_level (int): Star level of the unit, reads from star-level dropdown
+        nteam (int): The number of the selected unit you have on your team, input from the nteam dropdown
+        n_out_of_pool (int): The number of units of the same cost as the desired unit that are out of the pool, 
+            input from the n_out_of_pool input
+        level (int): Your team level, input from the level dropdown
+
+    Returns:
+        plotly.graph_objects._figure.Figure: Bar plot showing expected number of shops. 
+    """
+    
     
     if n_clicks > 0:
         unit_data = json.loads(unit_data)
@@ -277,6 +324,22 @@ def n_other_plot(n_clicks, unit_data, star_level, nteam, n_out_of_pool, level):
     State(component_id='level', component_property='value'),
 )
 def n_pool_plot(n_clicks,unit_data, star_level, nteam, nother, level):
+    """
+    Callback running classes.util.n_pool_shop_distribution() to display the expected number of shops
+    until the desired unit star level is hit as pool size of that unit's cost changes. Please see
+    classes.util.n_pool_shop_distribution() for more details on the how the expected number of shops is calculated.
+
+    Args:
+        n_clicks (int): How many times the submit button has been clicked
+        unit_data (str): json string of unit data, comes from the selected unit button
+        star_level (int): Star level of the unit, reads from star-level dropdown
+        nteam (int): The number of the selected unit you have on your team, input from the nteam dropdown
+        nother (int): The number of the selected unit on other boards and benches, input from the nother input
+        level (int): Your team level, input from the level dropdown
+
+    Returns:
+        plotly.graph_objects._figure.Figure: Bar plot showing expected number of shops.
+    """
     
     if n_clicks > 0:
         unit_data = json.loads(unit_data)
@@ -309,7 +372,20 @@ def n_pool_plot(n_clicks,unit_data, star_level, nteam, nother, level):
     Input({"type": "btn-unit", "index":ALL, "cost":ALL}, "n_clicks"),
     Input({"type": "btn-unit", "index":ALL, "cost":ALL}, "id"),
     prevent_initial_call=True)
-def btn_active(n_clicks, ids):
+def btn_active(n_clicks:list, ids:list) -> list:
+    """
+    Callback to update the class of selected button (btn-unit) to "active",
+    which changes its color. Callback also updates the selected unit data in the store.
+
+    Args:
+        n_clicks (list): List of number of times a btn-unit has been clicked
+        ids (list): List of ids of the btn-units
+
+    Returns:
+        list: List of new button class names
+        str: JSON string of the selected unit and cost
+    """
+    
     # If no button is clicked, return default class names
     if not ctx.triggered or not any(n_clicks):
         return ["me-1" for _ in n_clicks]
@@ -327,7 +403,20 @@ def btn_active(n_clicks, ids):
     Input({"type": "collapse-btn", "index":ALL, "cost":ALL}, "id"),
     State({"type": "collapse", "cost": ALL}, "is_open"),
     prevent_initial_call=True)
-def toggle_collapse(n_clicks, collapse_btn_ids, is_open):
+def toggle_collapse(n_clicks:list, collapse_btn_ids:list, is_open:list) -> list:
+    """
+    Callback to toggle the collapse of the unit selection buttons.
+    The function also updates the class of the selected collapse button to "active",
+
+    Args:
+        n_clicks (list): List of number of times a collapse button has been clicked
+        collapse_btn_ids (list): List of ids of the collapse buttons
+        is_open (list): List of boolean values indicating if the collapse is open
+
+    Returns:
+        list: List of boolean values indicating if the collapse is open
+        list: List of new collapse button class names
+    """
     # If no button is clicked, return default class names
     if not ctx.triggered or not any(n_clicks):
         return [False for _ in n_clicks], ["me-1" for _ in n_clicks]

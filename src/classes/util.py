@@ -1,5 +1,3 @@
-import requests
-import json
 import enum
 import numpy as np
 import plotly.express as px
@@ -7,7 +5,11 @@ from scipy.signal import convolve
 from scipy.stats import geom
 
 
+
 class BagSizes(enum.Enum):
+    """
+    Bag sizes for each cost level in TFT represented as an enum.
+    """
     
     _1COST = 30
     _2COST = 25
@@ -15,7 +17,26 @@ class BagSizes(enum.Enum):
     _4COST = 10
     _5COST = 9
 
-def process_state(unit, nteam, nother, star, level, shop):
+def process_state(unit, nteam:int, nother:int, star:int, level:int, shop) -> tuple:
+    """
+    Intermediate function to process how many of a certain unit are
+    one a team, how many are out of the pool, how many are desired, and 
+    what the odds of rolling the unit are.
+
+    Args:
+        unit (Unit): Unit being rolled for
+        nteam (int): Number of desired unit already purchased
+        nother (int): Number of desired unit on other boards or benches
+        star (int): Desired star level of desired unit
+        level (int): Current team level
+        shop (Shop): A shop object used to get odds for a certiain level
+
+    Returns:
+        nneeded (int): Number of copies of the unit needed to reach the desired star level
+        nleft (int): Number of unit copies left in the pool
+        cost (int): cost of the unit
+        cost_odd (float): Odds of a shop slot rolling the cost as the desired unit
+    """
     
     if nteam >= 9:
         nneeded = 0
@@ -30,39 +51,37 @@ def process_state(unit, nteam, nother, star, level, shop):
         nneeded = 1
         
     cost = unit.cost
-
     ntot = [ cost.value for cost in BagSizes ]
-
-    # level shouldn't matter for this
-    all_odds = shop.odds
-    
+    all_odds = shop.odds 
     odds = all_odds[level-1]
-
     cost_odd = odds[cost-1]
-
     nleft = ntot[cost-1] - nteam - nother # number left in pool
     
     return nneeded, nleft, cost, cost_odd
 
-def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=False, round_to_int=True):
+def number_shops(unit, nteam:int, npool:int, nother:int, star:int, level:int, shop, round_to_int=True):
     """
-    Calculates the expected number
-    of shops until you hit an upgrade (2 or
-    3 star).
-    ----------------------------------------
-    unit (Unit): The desired unit
-    nteam (int): Number of desired unit on 
-        team
-    npool (int or float): Number or percentage 
-        of units of the same 
-        cost of the desired unit left in the 
-        pool
-    nother (int): Number of desired unit on
-        other boards or benches
-    star (int): desired star level of unit
-    level (int): Current team level
-    shop (Shop): Current shop
+    Calculates the expected number of shops until you reach the desired star level
+    for a given unit. The expected number of shops to hit the next copy of the unit 
+    is calculated by taking the expectation of a geometric distribution (1/p) where 
+    p is the probability of rolling the unit in a shop slot. When multiple copies are 
+    needed, this expectation is calculated for as many copies as needed.
     
+    Args:
+        unit (Unit): Unit being rolled for
+        nteam (int): Number of desired unit already purchased
+        npool (int): Number or percentage of units of the same cost of the desired 
+            unit left in the pool
+        nother (int): Number of desired unit on other boards or benches
+        star (int): Desired star level of desired unit
+        level (int): Current team level
+        shop (Shop): A shop object used to get odds for a certiain level
+        round_to_int (bool): If True, rounds the expected number of shops to the nearest integer. 
+            If False, returns the expected number of shops as a float to the hundredths.
+            Default is True.
+    
+    Returns:
+        int or float: Expected number of shops until the desired star level is reached
     """
     
     nneeded, nleft, cost, cost_odd = process_state(unit, nteam, nother, star, level, shop)
@@ -95,18 +114,6 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
         npool -= 1
 
         nneeded -= 1
-
-    if not disable_print:
-
-        print(f"Probability per shop slot for hitting {number_needed} {unit.name}'s per: ")
-        print(probs)
-        print(f"Expected number of shop slots to hit {number_needed} {unit.name}'s per: ")
-        print(rolls)
-        print(f"Expected total number of shop slots to hit {number_needed} {unit.name}s: ")
-        print(sum(rolls))
-        print(f"Expected total number of shops to hit {number_needed} {unit.name}s: ")
-        print(sum(rolls)/5)
-    # confidence interval/distribution?
     
     if round_to_int:
         return round(sum(rolls)/5)
@@ -114,8 +121,34 @@ def number_shops(unit, nteam, npool, nother, star, level, shop, disable_print=Fa
 
         return round(sum(rolls)/5, 2)
 
-def cdf_plot(unit, nteam, npool, nother, star, level, shop):
-    # https://www.statlect.com/fundamentals-of-probability/sums-of-independent-random-variables
+def cdf_plot(unit, nteam:int, npool:int, nother:int, star:int, level:int, shop):
+    """
+    Creates a cumulative distribution function (CDF) plot for the probability of hitting the 
+    desired number of copies of a unit in a given number of shop rolls. The probability of 
+    hitting the next copy of a unit in a certain amount of shop slots is modeled as geometric process. 
+    The CDF is calculated using the convolving the probability mass functions (PMFs) of the 
+    geometric distribution for each copy needed. The CDF is then calculated by taking the cumulative 
+    sum of the PMF for every 5 shop slots, since a single shop reroll refreshes 5 slots. The CDF is plotted
+    using Plotly Express.
+    
+    Statistics source:  https://www.statlect.com/fundamentals-of-probability/sums-of-independent-random-variables
+
+    Args:
+        unit (Unit): Unit being rolled for
+        nteam (int): Number of desired unit already purchased
+        npool (int): Number or percentage of units of the same cost of the desired 
+            unit left in the pool
+        nother (int): Number of desired unit on other boards or benches
+        star (int): Desired star level of desired unit
+        level (int): Current team level
+        shop (Shop): A shop object used to get odds for a certain level
+
+    Returns:
+        plotly.graph_objects._figure.Figure: Bar plot of the probability of hitting the 
+            desired number of copies of a unit in a given number of shop rolls.
+    """
+    
+   
     return_blank = False
 
     nneeded, nleft, _, cost_odd = process_state(unit, nteam, nother, star, level, shop)  
@@ -151,10 +184,8 @@ def cdf_plot(unit, nteam, npool, nother, star, level, shop):
         nneeded -= 1
         npool -= 1
     
-    cdf = list()
-
-    for i in range(5,len(pmf),5):
-        cdf.append(sum(pmf[0:i+1])*100)
+    # cumulative sum of pmf for every 5 shop slots, aka a reroll
+    cdf = [ sum(pmf[0:i+1])*100 for i in range(5,len(pmf),5) ]
         
     fig = px.bar(x=np.arange(1, len(cdf)+1), y=cdf)
     fig.update_layout(
@@ -179,7 +210,6 @@ def cdf_plot(unit, nteam, npool, nother, star, level, shop):
     fig.update_yaxes(
         title_text="Probability of hitting",
         ticksuffix= "%",
-        # range=[0, 105]
     )
     fig.update_traces(
         hovertemplate="# of shop rolls: %{x}<br>Probability of hitting: %{y:.2f}%",
@@ -188,7 +218,23 @@ def cdf_plot(unit, nteam, npool, nother, star, level, shop):
     return fig
 
 
-def n_other_shop_distribution(unit, nteam, npool, star, level, shop):
+def n_other_shop_distribution(unit, nteam:int, npool:int, star:int, level:int, shop):
+    """
+    Creates a plot showing the expected number of shops rolls for hitting the desired star level of a unit
+    as the number of the desired units are taken out of the pool by other players changes. 
+
+    Args:
+        unit (Unit): Unit being rolled for
+        nteam (int): Number of desired unit already purchased
+        npool (int): Number or percentage of units of the same cost of the desired 
+            unit left in the pool
+        star (int): Desired star level of desired unit
+        level (int): Current team level
+        shop (Shop): A shop object used to get odds for a certiain level
+
+    Returns:
+        plotly.graph_objects._figure.Figure: Bar plot of expected number of shops rolls
+    """
     
     cost = unit.cost
     
@@ -205,7 +251,6 @@ def n_other_shop_distribution(unit, nteam, npool, star, level, shop):
                  star, 
                  level, 
                  shop, 
-                 disable_print=True, 
                  round_to_int=False) 
              for n in range(1, n_not_on_team)
              ]
@@ -239,7 +284,23 @@ def n_other_shop_distribution(unit, nteam, npool, star, level, shop):
     
     return fig
 
-def n_pool_shop_distribution(unit, nteam, nother, star, level, shop, units_per_cost):
+def n_pool_shop_distribution(unit, nteam:int, nother:int, star:int, level:int, shop, units_per_cost:int):
+    """
+    Creates a plot showing the expected number of shops rolls for hitting the desired star level of a unit
+    as the number of units of the same cost in the pool changes.
+
+    Args:
+        unit (Unit): Unit being rolled for
+        nteam (int): Number of desired unit already purchased
+        nother (int): Number of desired unit on other boards or benches
+        star (int): Desired star level of desired unit
+        level (int): Current team level
+        shop (Shop): A shop object used to get odds for a certiain level
+        units_per_cost (int): How many units of the same cost are in the pool.
+
+    Returns:
+        plotly.graph_objects._figure.Figure: Bar plot showing the expected number of shops rolls
+    """
     
     cost = unit.cost
     
@@ -256,7 +317,6 @@ def n_pool_shop_distribution(unit, nteam, nother, star, level, shop, units_per_c
                  star, 
                  level, 
                  shop, 
-                 disable_print=True, 
                  round_to_int=False) 
              for n in range(ntot, ncost)
              ]
@@ -290,58 +350,3 @@ def n_pool_shop_distribution(unit, nteam, nother, star, level, shop, units_per_c
     )
     
     return fig
-
-def load_units(set_='14'): 
-    """
-    Load CDragon TFT JSON data 
-
-    Returns dictionary of units sorted by unit cost
-    """
-
-    # url to CDragon for TFT latest patch, could change in the future
-    url = 'https://raw.communitydragon.org/latest/cdragon/tft/en_us.json'
-
-    r = requests.get(url)
-
-    data = json.loads(r.text)
-
-    units = dict()
-
-    for unit in data['sets'][set_]['champions']:
-    
-        if unit['cost'] <= 5 and len(unit['traits'])>0:
-
-            if unit['cost'] not in units.keys():
-                units[unit['cost']] = [unit['name']]
-            
-            else:
-                units[unit['cost']].append(unit['name'])
-
-    return units
-
-def load_shop_odds():
-
-    """
-    Grab shop odds from DDragon
-    """
-
-    # url to DDragon for TFT latest patch
-    url = 'https://raw.githubusercontent.com/InFinity54/LoL_DDragon/refs/heads/master/latest/data/en_US/tft-shop-drop-rates-data.json'
-
-    r = requests.get(url)
-
-    data = json.loads(r.text)
-
-    shop_odds = list()
-
-    # print(data['data']['Shop'][0])
-
-    for level in data['data']['Shop']:
-
-        level_drop_rates = level['dropRatesByTier'][0:5]
-
-        odds_array = np.array([ cost['rate'] for cost in level_drop_rates ])/100
-        shop_odds.append(odds_array)
-
-
-    return shop_odds

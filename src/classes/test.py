@@ -1,6 +1,6 @@
-import unittest
 import numpy as np
 import copy
+import unittest
 from .Unit import Unit
 from .Pool import Pool
 from .Shop import Shop
@@ -22,6 +22,7 @@ class TestPool(unittest.TestCase):
     """Testing Pool class"""
 
     def setUp(self):
+        # initialize a pool of units
         self.pool = Pool()
 
     def test_pool_size(self):
@@ -36,8 +37,8 @@ class TestPool(unittest.TestCase):
         self.assertEqual(self.pool.size(), np.dot(num_cost, bag_sizes), 'Pool size not correct')
        
     def test_get_unit(self):
-    
-        for i in range(1, 6): # testing that removing a unit from each cost reduces pool size
+        # testing that removing a unit from each cost reduces pool size
+        for i in range(1, 6): 
             cost_pool_size = self.pool.size(i)
             unit = self.pool.get_unit(i)
             # self.assertEqual(unit.cost, i, 'Unit cost not correct')
@@ -45,7 +46,7 @@ class TestPool(unittest.TestCase):
             self.pool.return_unit(unit) # return unit to pool
 
     def test_return_unit(self):
-
+        # testing that returning a unit to each cost increases pool size
         for i in range(1, 6):
 
             cost_pool_size = self.pool.size(i)
@@ -54,6 +55,9 @@ class TestPool(unittest.TestCase):
             self.assertEqual(self.pool.size(i), cost_pool_size, 'Pool size for {} cost not correct after return_unit'.format(i))
 
     def test_odds(self):
+        
+        # compare manual odds calculation to pool odds
+        # also test that odds are correct after getting and returning a unit
 
         example_units = (Unit('Amumu', 1), Unit('Vander', 2), Unit('Smeech', 3), Unit('Corki', 4), Unit('Sevika', 5))
         num_cost = (14, 13, 13, 12, 8)
@@ -78,15 +82,18 @@ class TestPool(unittest.TestCase):
             self.assertGreater(odds_after_return, odds_after_get, 'Odds not for {} cost increased after return_unit'.format(i))
 
 class TestShop(unittest.TestCase):
+    """Testing Shop class"""
 
     def setUp(self):
+        # create shops of all levels and a pool of units
         self.shops = [Shop(i) for i in range(1, 12)]
         self.pool = Pool()
 
     def test_shop_odds(self):
-
+        # check the number of levels present
         self.assertEqual(len(self.shops), 11, 'incorrect number of levels')
-
+        
+        # check that there are enough odds provided and that they sum to 1
         for i, shop in enumerate(self.shops):
 
             odds = shop.odds[i]
@@ -95,7 +102,7 @@ class TestShop(unittest.TestCase):
             self.assertAlmostEqual(np.sum(odds), 1, 7,'Odds do not sum to 1')
 
     def test_fresh_shop(self):
-
+        # make sure shop contains 5 slots and that they filled with units
         shop = copy.deepcopy(self.shops[7])
 
         shop.fresh_shop(self.pool)
@@ -106,7 +113,7 @@ class TestShop(unittest.TestCase):
 
             self.assertIsInstance(unit, Unit, 'Slot does not contain a unit')
 
-        
+        # if odds are manually set to 100% for a specific cost, then all slots should be that cost
         for i in range(5):
         
             shop.odds[7] = np.zeros(5)
