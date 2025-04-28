@@ -1,7 +1,7 @@
 # TFT Rolling
 
 ## Description
-[tft-rolling.com](tft-rolling.com) is a Dash-based web app hosted on GCP. It is designed to help TFT players understand how likely 
+[tft-rolling.com](http://tft-rolling.com) is a Dash-based web app hosted on GCP. It is designed to help TFT players understand how likely 
 they are to hit units based on their level, how contested they are, how many copies of a unit they need, and how many units of the
 same cost are taken out of the unit pool. 
 
