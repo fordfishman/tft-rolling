@@ -40,6 +40,7 @@ python -m -src.app
 ## To-do
 - The site is not currently mobile-friendly. The size and orientation of the panels should change according to screen size.
 - Memory constraints are a hinderance right now when multiple users are using the page.
+- Class test scripts currently need to be updated set-to-set. Try to find a better solution. 
 
 
 ## Contributing

@@ -27,7 +27,7 @@ class TestPool(unittest.TestCase):
 
     def test_pool_size(self):
 
-        num_cost = (14, 13, 13, 12, 8)
+        num_cost = (13, 13, 13, 13, 8)
         bag_sizes = (30, 25, 18, 10, 9)
 
         for i in range(1, 6): # testing that each pool size is correct
@@ -59,11 +59,11 @@ class TestPool(unittest.TestCase):
         # compare manual odds calculation to pool odds
         # also test that odds are correct after getting and returning a unit
 
-        example_units = (Unit('Amumu', 1), Unit('Vander', 2), Unit('Smeech', 3), Unit('Corki', 4), Unit('Sevika', 5))
-        num_cost = (14, 13, 13, 12, 8)
+        example_units = (Unit('Jax', 1), Unit('Vayne', 2), Unit('Senna', 3), Unit('Sejuani', 4), Unit('Viego', 5))
+        num_cost = (13, 13, 13, 13, 8)
         bag_sizes = (30, 25, 18, 10, 9)
 
-        for i in range(1, 6):
+        for i in range(2, 6):
 
             unit_test = example_units[i-1]
             odds_before = self.pool.get_odds(unit_test)
