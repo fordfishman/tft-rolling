@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: ${{ env.SERVICE }}
+  name: tft-rolling
 spec:
   template:
     metadata:
@@ -15,7 +15,7 @@ spec:
     spec:
       containerConcurrency: 80
       containers:
-      - image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.APP }}:latest
+      - image: us-east1-docker.pkg.dev/tft-rolling-probability/tft-rolling/app:latest
         name: app-1
         ports:
         - containerPort: 8080
