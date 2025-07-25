@@ -6,7 +6,7 @@ class Unit():
         name (str): Name of the unit
         cost (int): Cost of the unit (1-5)
     """
-    def __init__(self, name:str, cost:int):
+    def __init__(self, name:str, cost:int, traits:list=[]):
         """
         Unit constructor
 
@@ -19,5 +19,6 @@ class Unit():
 
         self.name = name
         self.cost = cost
+        self.traits = traits
         
 

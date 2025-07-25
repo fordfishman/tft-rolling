@@ -20,7 +20,7 @@ class Pool():
         Loads units and initializes pool according to bag sizes.
         """
         self.units = {i:[] for i in range(1,6)}
-        self.unit_dict = self.__load_units()
+        self.unit_dict = dict()
         self.new_game()
 
     def new_game(self) -> None:
@@ -34,20 +34,14 @@ class Pool():
             None
         """
         
-        for i in range(BagSizes._1COST.value):
-            self.units[1] += [Unit(unit_name, cost=1) for unit_name in self.unit_dict[1]]
+        unit_dict = self.__load_units()
         
-        for i in range(BagSizes._2COST.value):
-            self.units[2] += [Unit(unit_name, cost=2) for unit_name in self.unit_dict[2]]
-
-        for i in range(BagSizes._3COST.value):
-            self.units[3] += [Unit(unit_name, cost=3) for unit_name in self.unit_dict[3]]
+        for i, cost in enumerate(BagSizes):
             
-        for i in range(BagSizes._4COST.value):
-            self.units[4] += [Unit(unit_name, cost=4) for unit_name in self.unit_dict[4]]
-
-        for i in range(BagSizes._5COST.value):
-            self.units[5] += [Unit(unit_name, cost=5) for unit_name in self.unit_dict[5]]
+            self.unit_dict[i+1] = [unit['name'] for unit in unit_dict[i+1]]
+            
+            self.units[i+1] += [Unit(unit['name'], cost=i+1, traits=unit['traits']) for unit in unit_dict[i+1]] * cost.value
+                
         
         return None
     
@@ -57,10 +51,10 @@ class Pool():
         and their costs. Traitless and 0 cost units are removed.
 
         Args:
-            set_ (str): Set number to load. Default is '14'.
+            set_ (str): Set number to load. Default is current set.
         
         Returns: 
-            dict: Units sorted by unit cost
+            dict: Dictionary of unit data sorted by unit cost
         """
 
         # url to CDragon for TFT latest patch, could change in the future
@@ -77,10 +71,10 @@ class Pool():
             if unit['cost'] <= 5 and len(unit['traits'])>0:
 
                 if unit['cost'] not in units.keys():
-                    units[unit['cost']] = [unit['name']]
+                    units[unit['cost']] = [unit]
                 
                 else:
-                    units[unit['cost']].append(unit['name'])
+                    units[unit['cost']].append(unit)
 
         return units
 

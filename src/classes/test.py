@@ -10,13 +10,15 @@ class TestUnit(unittest.TestCase):
     """Testing Unit class"""
     def test_attributes(self):
 
-        unit_name = 'Amumu'
+        unit_name = 'Jax'
         unit_cost = 1
+        unit_traits = ['Exotech', 'Bastion']
 
-        unit = Unit(unit_name, unit_cost)
+        unit = Unit(unit_name, unit_cost, unit_traits)
 
         self.assertEqual(unit.name, unit_name, 'Unit name not set correctly')
         self.assertEqual(unit.cost, unit_cost, 'Unit cost not set correctly')
+        self.assertEqual(unit.traits, unit_traits, 'Unit traits not set correctly')
 
 class TestPool(unittest.TestCase):
     """Testing Pool class"""
@@ -59,7 +61,7 @@ class TestPool(unittest.TestCase):
         # compare manual odds calculation to pool odds
         # also test that odds are correct after getting and returning a unit
 
-        example_units = (Unit('Jax', 1), Unit('Vayne', 2), Unit('Senna', 3), Unit('Sejuani', 4), Unit('Viego', 5))
+        example_units = (Unit('Jax', 1, ['Exotech', 'Bastion']), Unit('Vayne', 2, ['Anima Squad', 'Slayer']), Unit('Senna', 3, ['Divinicorp', 'Slayer']), Unit('Sejuani', 4, ['Exotech','Bastion']), Unit('Aurora', 5, ['Anima Squad', 'Dynamo']))
         num_cost = (13, 13, 13, 13, 8)
         bag_sizes = (30, 25, 18, 10, 9)
 

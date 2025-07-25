@@ -2,9 +2,10 @@ import json
 import plotly.express as px
 from dash import Dash, html, dcc, callback, Output, Input, State, ctx, ALL, no_update
 import dash_bootstrap_components as dbc
-from .classes.Unit import Unit
-from .classes.Pool import Pool
-from .classes.Shop import Shop
+# from .classes.Unit import Unit
+# from .classes.Pool import Pool
+# from .classes.Shop import Shop
+from .classes.set_specific import Unit_, Pool_, Shop_
 from .classes.util import number_shops, cdf_plot, n_other_shop_distribution, n_pool_shop_distribution
 
 # Initialize the app - incorporate css
@@ -15,8 +16,8 @@ app.title = "TFT Rolling: Probability of Hitting a Unit"
 server = app.server
 
 # Initialize game state
-pool = Pool()
-shops = [Shop(i) for i in range(1,12)]
+pool = Pool_()
+shops = [Shop_(i) for i in range(1,12)]
 
 cost_colors = ['secondary', 'success','primary', '4-cost', 'warning']
 
@@ -190,7 +191,7 @@ def update_number_of_shops(n_clicks:int, unit_data:str, star_level:int, nteam:in
             unit_data['unit_name'],
             star_level,
             number_shops(
-                Unit(unit_data['unit_name'], unit_data['cost']), 
+                Unit_(unit_data['unit_name'], unit_data['cost']), 
                 nteam=nteam, 
                 npool=pool.size(unit_data['cost']) - n_out_of_pool - nteam - nother, 
                 nother=nother, 
@@ -237,7 +238,7 @@ def roll_probability(n_clicks:int, unit_data:str, star_level:int, nteam:int, not
         
         unit_data = json.loads(unit_data)
         fig = cdf_plot(
-            Unit(unit_data['unit_name'], unit_data['cost']), 
+            Unit_(unit_data['unit_name'], unit_data['cost']), 
             nteam=nteam, 
             npool=pool.size(unit_data['cost']) - n_out_of_pool - nteam - nother, 
             nother=nother, 
@@ -292,7 +293,7 @@ def n_other_plot(n_clicks:int, unit_data:str, star_level:int, nteam:int, n_out_o
     if n_clicks > 0:
         unit_data = json.loads(unit_data)
         fig = n_other_shop_distribution(
-            Unit(unit_data['unit_name'], unit_data['cost']), 
+            Unit_(unit_data['unit_name'], unit_data['cost']), 
             nteam=nteam, 
             npool=pool.size(unit_data['cost']) - n_out_of_pool - nteam, 
             star=star_level,
@@ -344,7 +345,7 @@ def n_pool_plot(n_clicks,unit_data, star_level, nteam, nother, level):
     if n_clicks > 0:
         unit_data = json.loads(unit_data)
         fig = n_pool_shop_distribution(
-            Unit(unit_data['unit_name'], unit_data['cost']), 
+            Unit_(unit_data['unit_name'], unit_data['cost']), 
             nteam=nteam, 
             nother=nother, 
             star=star_level,
