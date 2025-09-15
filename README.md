@@ -40,6 +40,7 @@ python -m -src.app
 ## To-do
 - The site is not currently mobile-friendly. The size and orientation of the panels should change according to screen size.
 - Memory constraints are a hinderance right now when multiple users are using the page.
+- Look into using [generators for lists and LRU caching pure functions.](https://msalinas92.medium.com/i-made-my-python-code-10x-faster-using-these-little-known-tricks-that-most-developers-ignore-72d36d097b60) 
 - Class test scripts currently need to be updated set-to-set. Try to find a better solution. 
 
 
