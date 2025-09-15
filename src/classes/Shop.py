@@ -23,9 +23,9 @@ class Shop():
         """
         self.__level = level
         self.slots = [ None for i in range(5) ]
-        self.odds = self.__load_shop_odds()
+        self.odds = self.load_shop_odds()
         
-    def __load_shop_odds(self) -> list:
+    def load_shop_odds(self) -> list:
 
         """
         Uses requests to grab shop odds from DDragon for each level

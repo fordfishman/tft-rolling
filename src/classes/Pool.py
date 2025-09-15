@@ -34,7 +34,7 @@ class Pool():
             None
         """
         
-        unit_dict = self.__load_units()
+        unit_dict = self.load_units()
         
         for i, cost in enumerate(BagSizes):
             
@@ -45,7 +45,7 @@ class Pool():
         
         return None
     
-    def __load_units(self, set_:str='14') -> dict: 
+    def load_units(self, set_:str='15') -> dict: 
         """
         Load CDragon TFT JSON data, which contains all units
         and their costs. Traitless and 0 cost units are removed.
